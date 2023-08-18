@@ -1,0 +1,8 @@
+create_table("messages") {
+    t.Column("id", "uuid", {"default_raw": "gen_random_uuid()"})
+    t.Column("text", "text", {})
+    t.Column("sender_id" , "uuid", {})
+    t.Column("receiver_id" , "uuid", {})
+    t.ForeignKey("sender_id", {"users": ["id"]}, {"on_delete": "cascade"})
+    t.ForeignKey("receiver_id", {"users": ["id"]}, {"on_delete": "cascade"})
+}

@@ -1,0 +1,11 @@
+create_table("users") {
+    t.Column("id", "uuid", {"default_raw": "gen_random_uuid()", "primary":"true"})
+    t.Column("username", "string", {"size": 50})
+    t.Column("first_name", "string", {"size": 50})
+    t.Column("last_name", "string", {"size": 50})
+    t.Column("email", "string", {"size": 100})
+    t.Column("password", "text", {})
+}
+
+add_index("users", "email", {"unique": true})
+add_index("users", "username", {"unique": true})
