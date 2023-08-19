@@ -3,6 +3,9 @@ create_table("messages") {
     t.Column("text", "text", {})
     t.Column("sender_id" , "uuid", {})
     t.Column("receiver_id" , "uuid", {})
+    t.DisableTimestamps()
+    t.Column("created_at", "timestamp", {"default_raw": "now()"})
+    t.Column("updated_at", "timestamp", {"default_raw": "now()"})
     t.ForeignKey("sender_id", {"users": ["id"]}, {"on_delete": "cascade"})
     t.ForeignKey("receiver_id", {"users": ["id"]}, {"on_delete": "cascade"})
 }

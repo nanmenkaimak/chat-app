@@ -1,12 +1,22 @@
 package main
 
 import (
-	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/nanmenkaimak/chat-app/internal/dbs/postgres"
+	"github.com/nanmenkaimak/chat-app/internal/handlers"
 )
 
+const portNumber = ":8080"
+
 func main() {
-	_, err := postgres.New()
-	fmt.Println(err)
+	db, err := postgres.New()
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	repo := handlers.NewRepo(db)
+	handlers.NewHandlers(repo)
+
+	routes()
 }

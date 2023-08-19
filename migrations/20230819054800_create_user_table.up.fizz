@@ -5,6 +5,11 @@ create_table("users") {
     t.Column("last_name", "string", {"size": 50})
     t.Column("email", "string", {"size": 100})
     t.Column("password", "text", {})
+    t.Column("role_id", "integer", {"default": 1})
+    t.DisableTimestamps()
+    t.Column("created_at", "timestamp", {"default_raw": "now()"})
+    t.Column("updated_at", "timestamp", {"default_raw": "now()"})
+    t.ForeignKey("role_id", {"roles": ["id"]}, {"on_delete": "cascade"})
 }
 
 add_index("users", "email", {"unique": true})

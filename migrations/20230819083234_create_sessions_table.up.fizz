@@ -1,0 +1,12 @@
+create_table("sessions") {
+    t.Column("id", "uuid", {"default_raw": "gen_random_uuid()"})
+    t.Column("user_id" , "uuid", {})
+    t.Column("refresh_token", "text", {})
+    t.Column("user_agent", "string", {})
+    t.Column("client_ip", "string", {})
+    t.Column("is_blocked", "bool", {"default": false})
+    t.Column("expires_at", "timestamp", {})
+    t.DisableTimestamps()
+    t.Column("created_at", "timestamp", {"default_raw": "now()"})
+    t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade"})
+}
