@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/asaskevich/govalidator"
 	"strings"
+	"unicode"
 )
 
 // Form creates a custom form struct, embeds a url.Values object
@@ -53,5 +54,22 @@ func (f *Form) MinLength(field string, length int) bool {
 func (f *Form) IsEmail(field string) {
 	if !govalidator.IsEmail(field) {
 		f.Errors.Add(field, "Invalid email address")
+	}
+}
+
+func (f *Form) ValidPassword(s string) {
+next:
+	for name, classes := range map[string][]*unicode.RangeTable{
+		"upper case": {unicode.Upper, unicode.Title},
+		"lower case": {unicode.Lower},
+		"numeric":    {unicode.Number, unicode.Digit},
+		"special":    {unicode.Space, unicode.Symbol, unicode.Punct, unicode.Mark},
+	} {
+		for _, r := range s {
+			if unicode.IsOneOf(classes, r) {
+				continue next
+			}
+		}
+		f.Errors.Add(s, fmt.Sprintf("password must have at least one %s character", name))
 	}
 }

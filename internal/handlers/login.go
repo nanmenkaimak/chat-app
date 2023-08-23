@@ -30,15 +30,16 @@ func (m *Repository) Login(c *fiber.Ctx) error {
 	form := forms.New()
 
 	form.IsEmail(userLogin.Email)
-	form.MinLength(userLogin.Password, 8)
-
-	if !form.Valid() {
-		return fiber.NewError(http.StatusBadRequest, errors.New("your email or password are not valid").Error())
+	if form.Errors.Get(userLogin.Email) != "" {
+		return fiber.NewError(http.StatusBadRequest, form.Errors.Get(userLogin.Email))
 	}
-
-	err := validPassword(userLogin.Password)
-	if err != nil {
-		return fiber.NewError(http.StatusBadRequest, errors.Wrap(err, "login").Error())
+	form.MinLength(userLogin.Password, 8)
+	if form.Errors.Get(userLogin.Password) != "" {
+		return fiber.NewError(http.StatusBadRequest, form.Errors.Get(userLogin.Password))
+	}
+	form.ValidPassword(userLogin.Password)
+	if form.Errors.Get(userLogin.Password) != "" {
+		return fiber.NewError(http.StatusBadRequest, form.Errors.Get(userLogin.Password))
 	}
 
 	id, _, err := m.DB.Authenticate(userLogin)

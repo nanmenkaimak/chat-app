@@ -1,14 +1,12 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/nanmenkaimak/chat-app/internal/forms"
 	"github.com/nanmenkaimak/chat-app/internal/models"
 	"github.com/pkg/errors"
 	"net/http"
-	"unicode"
 )
 
 type signUpResponse struct {
@@ -25,15 +23,16 @@ func (m *Repository) SignUp(c *fiber.Ctx) error {
 	form := forms.New()
 
 	form.IsEmail(newUser.Email)
-	form.MinLength(newUser.Password, 8)
-
-	if !form.Valid() {
-		return fiber.NewError(http.StatusBadRequest, errors.New("your email or password are not valid").Error())
+	if form.Errors.Get(newUser.Email) != "" {
+		return fiber.NewError(http.StatusBadRequest, form.Errors.Get(newUser.Email))
 	}
-
-	err := validPassword(newUser.Password)
-	if err != nil {
-		return fiber.NewError(http.StatusBadRequest, errors.Wrap(err, "sign up").Error())
+	form.MinLength(newUser.Password, 8)
+	if form.Errors.Get(newUser.Password) != "" {
+		return fiber.NewError(http.StatusBadRequest, form.Errors.Get(newUser.Password))
+	}
+	form.ValidPassword(newUser.Password)
+	if form.Errors.Get(newUser.Password) != "" {
+		return fiber.NewError(http.StatusBadRequest, form.Errors.Get(newUser.Password))
 	}
 
 	id, err := m.DB.CreateUser(newUser)
@@ -44,22 +43,4 @@ func (m *Repository) SignUp(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(signUpResponse{
 		UserID: id,
 	})
-}
-
-func validPassword(s string) error {
-next:
-	for name, classes := range map[string][]*unicode.RangeTable{
-		"upper case": {unicode.Upper, unicode.Title},
-		"lower case": {unicode.Lower},
-		"numeric":    {unicode.Number, unicode.Digit},
-		"special":    {unicode.Space, unicode.Symbol, unicode.Punct, unicode.Mark},
-	} {
-		for _, r := range s {
-			if unicode.IsOneOf(classes, r) {
-				continue next
-			}
-		}
-		return fmt.Errorf("password must have at least one %s character", name)
-	}
-	return nil
 }
